@@ -246,6 +246,7 @@ bool checkDate(string d){
 
 };
 
+//This is a main function
 int main(){
     //Opening statements 
     cout << "Welcome to Green FootPrint, \n"
