@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <chrono>
 #include <format>
+#include <fstream>
 using namespace std; 
 
 class Expense{
@@ -38,7 +39,7 @@ class Expense{
 bool isValidInput(string&); 
 bool checkDate(string);
 
-void addItem(vector<Expense>& vec){
+void addItem(vector<Expense>& vec, fstream& file){
     //gathers class attributes 
     string cat, des, time; 
     double price; 
@@ -96,14 +97,25 @@ void addItem(vector<Expense>& vec){
 
     //finally adds the log to a vector
     vec.push_back(Expense(cat, des, time, price)); 
-
+    //switching to persistent storage: Using I/O operations 
+    //Make sure file is open
+    //writing to file now....
+    //Must make sure the pointer of the file is at the end
+    file.open("records.csv", ios::out | ios::app) ;
+    if (!file) {
+        std::cerr << "Failed to open file for writing.\n";
+    }
+    file.seekp(0, ios::end);
+    file << cat << "," << des << "," << time << "," << price << endl;
+    file.close();
 };
 
-void printItem(Expense x){
-    cout << x.getDate() << " " << x.getCategory() << " $" << x.getCost() << " " << x.getDescription() << endl; 
+void printItem(const vector<string>& vec){
+    cout << vec[0] << " " << vec[1] << " " << vec[2] << " $" << vec[3] << endl;
 }; 
 
-void printCatalog(vector<Expense>& vec){
+void printCatalog(vector<Expense>& vec, fstream& file){
+  /* USES VECTOR TO PRINT
     if(vec.size() == 0){
         cout << "No expenses logged yet." << endl;
     }
@@ -114,9 +126,34 @@ void printCatalog(vector<Expense>& vec){
         }
     }
     cout << " " << endl;
+*/
+
+    //Will hold the one line in the file 
+    string line;
+    //make sure file points to beginning
+    //Opens the file to read
+    file.open("records.csv", ios::in);
+    file.seekg(0, ios::beg);
+    if (!file) {
+        std::cerr << "Failed to open file for reading.\n";
+    }
+    //Read the file line by line
+    while(getline(file,line)){
+        stringstream ss(line);
+        string cell;
+
+        //Read each cell (column) in the line separated by commas
+        while(getline(ss,cell,',')){
+            cout << cell << "\t"; //output each cell separated by a tab
+        }
+
+        cout << endl; //starts a new line at end of row
+    }
+    file.close();
+
 }; 
 
-void searchItem(vector<Expense>& vec){
+void searchItem(vector<Expense>& vec, fstream& file){
     string targetDate; 
     bool found = false; 
     cout << "\nEnter the date of the log you would like to search for(MM/DD/YYYY):" << endl;
@@ -129,7 +166,7 @@ void searchItem(vector<Expense>& vec){
     
     //for every element in the vector it checks the targetDate. If it is true, then 
     //it will print every log under that date
-    for(int i = 0; i < vec.size() && !found; i++){
+/*  for(int i = 0; i < vec.size(); i++){
         if(vec[i].getDate() == targetDate){
             printItem(vec[i]);  
             found = true; 
@@ -138,10 +175,41 @@ void searchItem(vector<Expense>& vec){
     if(!found){
         cout << "No logs were found." << endl;
     }
+*/
+    //searches for log in file
+    string line;
 
+    //opens file to read
+    file.open("records.csv", ios::in);
+    if (!file) {
+        std::cerr << "Failed to open file for writing.\n";
+    }
+    //makes sure file points to beginning
+    file.seekg(0, ios::beg);
+
+    while(getline(file,line)){
+        stringstream ss(line);
+        string cell;
+        vector<string> row;
+
+        while(getline(ss,cell,',')){
+            row.push_back(cell); //turns each individual item into an element to search 
+        }
+        
+        //checks if target value matches the date column(should be the 3 column)
+        if(row[2] == targetDate){
+            cout << "\nMatch found:" << endl;
+            printItem(row); 
+            found = true;
+        }
+    }
+    if(!found){
+        cout << "No matched found." << endl;
+    }
+    file.close();
 }; 
 
-void deleteItem(vector<Expense>& vec){
+void deleteItem(vector<Expense>& vec, fstream& file){
     string targetDate; 
     cout << "\nEnter the date of the log you would like to search for(MM/DD/YYYY):" << endl;
     cin >> targetDate; 
@@ -153,12 +221,12 @@ void deleteItem(vector<Expense>& vec){
 
     //creates a temp array for all the targeted dates 
     vector<Expense> temp; 
-    char choice = 'y'; 
+    //char choice = 'y'; 
     bool exitLoops = false; 
-
+/*
     for(int i  = 0; i < vec.size() && !exitLoops; i++ ){
         if(vec[i].getDate() == targetDate){
-            printItem(vec[i]);
+            //printItem(vec[i]);
             cout << "Is this what you would like to delete? (Y or N)" << endl;
             //temp.push_back(Expense(vec[i].getCategory(), vec[i].getDescription(), vec[i].getDate(), vec[i].getCost()));
             char deleteChoice;
@@ -170,11 +238,69 @@ void deleteItem(vector<Expense>& vec){
 
         }
     }
+*/
 
-
-    if(!exitLoops){
-        cout << "No logs were found under " << targetDate << "." << endl; 
+   //creates a temperary file and opens records file
+   ofstream tempFile("temp.csv");
+   if(!tempFile.is_open()){
+       cerr << "Could not open file." << endl;
+   }
+   file.open("records.csv", ios::in);
+   if (!file) {
+        std::cerr << "Failed to open file for writing.\n";
     }
+
+    //searches for log in file
+    string line;
+    //makes sure file points to beginning
+    file.seekg(0, ios::beg);
+
+    while(getline(file,line)){
+        stringstream ss(line);
+        string cell;
+        vector<string> row;
+
+
+        while(getline(ss,cell,',')){
+            row.push_back(cell); //turns each individual item into an element to search 
+        }
+        for(string e: row){
+            cout << e << " ";
+        }
+        cout << "size: " << row.size() << endl;
+ 
+
+        //checks if target value matches the date column(should be the 3 column)
+        if(row[2] == targetDate && !exitLoops){
+            printItem(row);
+            cout << "Is this what you would like to delete? (Y or N)" << endl; 
+            char deleteChoice;
+            cin >> deleteChoice; 
+            if(tolower(deleteChoice) == 'y'){
+                exitLoops = true;
+                cout << "Item deleted from log.\n" << endl;
+            }
+            else{
+                tempFile << line << endl;
+            }
+        }
+        else{
+            tempFile << line << endl;
+        }
+    }
+  
+    tempFile.close(); // Always close the temp file first
+
+    file.close();     // Close original file before replacing
+
+    if (!exitLoops) {
+        std::cout << "No logs were found under " << targetDate << ".\n" << std::endl;
+        std::remove("temp.csv"); // No change, so delete temp
+    } else {
+        std::remove("records.csv");        // Replace with your actual filename
+        std::rename("temp.csv", "records.csv");
+        std::cout << "Log updated successfully.\n" << std::endl;
+    }   
 }; 
 
 void printMenu(){
@@ -253,7 +379,18 @@ int main(){
         "an online personal expense tracker where you can log any and every expenditure.\n" << endl; 
 
     vector<Expense> log;  
+    //opens or creates a file
+    fstream myFile("records.csv", ios::in | ios::out | ios::app); 
+    if(!myFile){
+        cerr << "Error opening file!" << endl;
+        return 1;
 
+    }
+    //Adds column headers if file is created
+    if(!myFile.is_open())
+        myFile << "Category, Description, Date, Price" << endl;
+    
+    myFile.close();
     string choice = "q"; 
     do{
         //prints menu
@@ -272,17 +409,20 @@ int main(){
         }
 
         if(tolower(choice[0]) == 'a'){
-            addItem(log); 
+            addItem(log, myFile); 
         }
         else if(tolower(choice[0]) == 's'){
-            searchItem(log);
+            searchItem(log, myFile);
         }
         else if(tolower(choice[0]) == 'd'){
-            deleteItem(log);
+            deleteItem(log, myFile);
         }
         else if(tolower(choice[0]) == 'p'){
-            printCatalog(log);        }
+            printCatalog(log, myFile);        }
         
 
     }while(tolower(choice[0]) != 'q');
+
+    myFile.close();//closes file
 }
+
