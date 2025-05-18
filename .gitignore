@@ -1,0 +1,28 @@
+# Ignore compiled object files
+*.o
+*.obj
+
+# Ignore executable binaries
+*.exe
+a.out
+
+# Ignore build directories
+/build/
+/bin/
+/Debug/
+/Release/
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# Ignore system files
+Thumbs.db
+.DS_Store
+
+# Ignore IDE files (for example, Visual Studio or CLion)
+*.vcxproj*
+*.sln
+.idea/
+*.code-workspace
