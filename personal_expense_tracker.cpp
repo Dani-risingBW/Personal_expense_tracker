@@ -110,7 +110,8 @@ void addItem(fstream& file){
 };
 
 void printItem(const vector<string>& vec){
-    cout << vec[0] << " " << vec[1] << " " << vec[2] << " $" << vec[3] << endl;
+    cout << left; 
+    cout << setw(25) << vec[0] << setw(25) << vec[1] << setw(25) << vec[2] << setw(15) << ("$" + vec[3]) << endl;
 }; 
 
 void printCatalog(fstream& file){
@@ -131,7 +132,8 @@ void printCatalog(fstream& file){
 
         //Read each cell (column) in the line separated by commas
         while(getline(ss,cell,',')){
-            cout << cell << "\t"; //output each cell separated by a tab
+            cout << left; 
+            cout << setw(25) << cell; //output each cell separated by a tab
         }
 
         cout << endl; //starts a new line at end of row
@@ -223,10 +225,7 @@ void deleteItem(fstream& file){
         while(getline(ss,cell,',')){
             row.push_back(cell); //turns each individual item into an element to search 
         }
-        for(string e: row){
-            cout << e << " ";
-        }
-        cout << "size: " << row.size() << endl;
+    
  
 
         //checks if target value matches the date column(should be the 3 column)
@@ -339,7 +338,7 @@ bool isValidInput(string& userInput){
     }
 
     if(tolower(input) == 'a' || tolower(input) == 's' || tolower(input) == 'd' || tolower(input) == 'p' || tolower(input) == 'y' || tolower(input) == 'n' 
-        || tolower(input) == 'q'){
+        || tolower(input) == 'q' || tolower(input) == 'f'){
         return true; 
     }
     return false; 
@@ -406,7 +405,7 @@ int main(){
     }
     //Adds column headers if file is created
     if(!myFile.is_open())
-        myFile << "Category, Description, Date, Price" << endl;
+        myFile << "Category,Description,Date,Price" << endl;
     
     myFile.close();
     string choice = "q"; 
