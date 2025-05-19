@@ -40,7 +40,7 @@ class Expense{
 bool isValidInput(string&); 
 bool checkDate(string);
 
-void addItem(vector<Expense>& vec, fstream& file){
+void addItem(fstream& file){
     //gathers class attributes 
     string cat, des, time; 
     double price; 
@@ -111,24 +111,12 @@ void addItem(vector<Expense>& vec, fstream& file){
     file.close();
 };
 
-void printItem(const vector<string>& vec){
+/*void printItem(const vector<string>& vec){
     cout << vec[0] << " " << vec[1] << " " << vec[2] << " $" << vec[3] << endl;
-}; 
+}; */
 
-void printCatalog(vector<Expense>& vec, fstream& file){
-  /* USES VECTOR TO PRINT
-    if(vec.size() == 0){
-        cout << "No expenses logged yet." << endl;
-    }
-    else{
-        cout << " " << endl;
-        for(int i = 0; i < vec.size(); i++){
-            cout << vec[i].getDate() << " " << vec[i].getCategory() << " $" << vec[i].getCost() << " " << vec[i].getDescription() << endl; 
-        }
-    }
-    cout << " " << endl;
-*/
-
+void printCatalog(fstream& file){
+  
     //Will hold the one line in the file 
     string line;
     //make sure file points to beginning
@@ -154,7 +142,7 @@ void printCatalog(vector<Expense>& vec, fstream& file){
 
 }; 
 
-void searchItem(vector<Expense>& vec, fstream& file){
+void searchItem(fstream& file){
     string targetDate; 
     bool found = false; 
     cout << "\nEnter the date of the log you would like to find for(MM/DD/YYYY):" << endl;
@@ -165,18 +153,6 @@ void searchItem(vector<Expense>& vec, fstream& file){
         cin >> targetDate; 
     }
     
-    //for every element in the vector it checks the targetDate. If it is true, then 
-    //it will print every log under that date
-/*  for(int i = 0; i < vec.size(); i++){
-        if(vec[i].getDate() == targetDate){
-            printItem(vec[i]);  
-            found = true; 
-        }
-    }
-    if(!found){
-        cout << "No logs were found." << endl;
-    }
-*/
     //searches for log in file
     string line;
 
@@ -210,7 +186,7 @@ void searchItem(vector<Expense>& vec, fstream& file){
     file.close();
 }; 
 
-void deleteItem(vector<Expense>& vec, fstream& file){
+void deleteItem(fstream& file){
     string targetDate; 
     cout << "\nEnter the date of the log you would like to search for(MM/DD/YYYY):" << endl;
     cin >> targetDate; 
@@ -224,22 +200,6 @@ void deleteItem(vector<Expense>& vec, fstream& file){
     vector<Expense> temp; 
     //char choice = 'y'; 
     bool exitLoops = false; 
-/*
-    for(int i  = 0; i < vec.size() && !exitLoops; i++ ){
-        if(vec[i].getDate() == targetDate){
-            //printItem(vec[i]);
-            cout << "Is this what you would like to delete? (Y or N)" << endl;
-            //temp.push_back(Expense(vec[i].getCategory(), vec[i].getDescription(), vec[i].getDate(), vec[i].getCost()));
-            char deleteChoice;
-            cin >> deleteChoice; 
-            if(tolower(deleteChoice) == 'y'){
-                vec.erase(vec.begin() + i);
-                exitLoops = true;
-            }
-
-        }
-    }
-*/
 
    //creates a temperary file and opens records file
    ofstream tempFile("temp.csv");
@@ -362,19 +322,6 @@ void sortByPrice(fstream& file, int num){
     rename("temp.csv", "records.csv");
 };
 
-/*void sortByCategory(fstream& file, int num){
-    //holds each line in the file 
-    string line;
-
-    //opens file to read
-    file.open("records.csv", ios::in);
-    if (!file) {
-        std::cerr << "Failed to open file for writing.\n";
-    }
-    //makes sure file points to beginning
-    file.seekg(0, ios::beg);
-};*/
-
 void printMenu(){
     cout << "A - Add a Log" << endl;
     cout << "F - Find a Log" << endl;
@@ -482,16 +429,16 @@ int main(){
         }
 
         if(tolower(choice[0]) == 'a'){
-            addItem(log, myFile); 
+            addItem(myFile); 
         }
         else if(tolower(choice[0]) == 'f'){
-            searchItem(log, myFile);
+            searchItem(myFile);
         }
         else if(tolower(choice[0]) == 'd'){
-            deleteItem(log, myFile);
+            deleteItem(myFile);
         }
         else if(tolower(choice[0]) == 'p'){
-            printCatalog(log, myFile);   
+            printCatalog(myFile);   
         }
         else if(tolower(choice[0]) == 's'){
             cout << "\nWill you like to sort by price or category:" << endl;
