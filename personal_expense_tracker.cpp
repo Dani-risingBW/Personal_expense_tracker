@@ -6,6 +6,7 @@
 #include <chrono>
 #include <format>
 #include <fstream>
+#include <algorithm>
 using namespace std; 
 
 class Expense{
@@ -156,7 +157,7 @@ void printCatalog(vector<Expense>& vec, fstream& file){
 void searchItem(vector<Expense>& vec, fstream& file){
     string targetDate; 
     bool found = false; 
-    cout << "\nEnter the date of the log you would like to search for(MM/DD/YYYY):" << endl;
+    cout << "\nEnter the date of the log you would like to find for(MM/DD/YYYY):" << endl;
     cin >> targetDate; 
 
     while(!checkDate(targetDate)){
@@ -294,19 +295,91 @@ void deleteItem(vector<Expense>& vec, fstream& file){
     file.close();     // Close original file before replacing
 
     if (!exitLoops) {
-        std::cout << "No logs were found under " << targetDate << ".\n" << std::endl;
-        std::remove("temp.csv"); // No change, so delete temp
+        cout << "No logs were found under " << targetDate << ".\n" << std::endl;
+        remove("temp.csv"); // No change, so delete temp
     } else {
-        std::remove("records.csv");        // Replace with your actual filename
-        std::rename("temp.csv", "records.csv");
-        std::cout << "Log updated successfully.\n" << std::endl;
+        remove("records.csv");        // Replace with your actual filename
+        rename("temp.csv", "records.csv");
+        cout << "Log updated successfully.\n" << std::endl;
     }   
 }; 
 
+void sortByPrice(fstream& file, int num){
+   //holds each line in the file 
+    string line;
+
+    //creates a temperary file and opens records file
+   ofstream tempFile("temp.csv");
+   if(!tempFile.is_open()){
+       cerr << "Could not open file." << endl;
+   }
+    //opens file to read
+    file.open("records.csv", ios::in);
+    if (!file) {
+        std::cerr << "Failed to open file for writing.\n";
+    }
+    //makes sure file points to beginning
+    file.seekg(0, ios::beg);
+
+    //build a matrix manually
+    vector<vector<string>> fileMatrix;
+
+    //read each line into the file
+    while(getline(file,line)){
+        string cell;
+        stringstream ss(line);
+        vector<string> row; 
+        while(getline(ss,cell,',')){
+            row.push_back(cell);
+        }
+        fileMatrix.push_back(row); //adds vector row to another vector
+    }
+    if(num == 3){//compares string as doubles to be correct interpret data
+       sort(fileMatrix.begin() + 1, fileMatrix.end(), [num](const vector<string>& a, const vector<string>& b){
+            return stod(a[num]) < stod(b[num]);
+        }); 
+    }
+    else{
+        sort(fileMatrix.begin() + 1, fileMatrix.end(), [num](const vector<string>& a, const vector<string>& b){
+            return a[num] < b[num];
+        });
+    }
+
+    file.close(); 
+
+    //adds matrix to new file
+    for(size_t r = 0; r < fileMatrix.size(); r++){
+        for (size_t i = 0; i < fileMatrix[r].size(); ++i) {
+            tempFile << fileMatrix[r][i];
+            if (i != fileMatrix[r].size() - 1) 
+                tempFile << ",";
+        }
+        tempFile << "\n";
+    }
+
+    tempFile.close();
+    remove("records.csv");   // Replace with your actual filename
+    rename("temp.csv", "records.csv");
+};
+
+/*void sortByCategory(fstream& file, int num){
+    //holds each line in the file 
+    string line;
+
+    //opens file to read
+    file.open("records.csv", ios::in);
+    if (!file) {
+        std::cerr << "Failed to open file for writing.\n";
+    }
+    //makes sure file points to beginning
+    file.seekg(0, ios::beg);
+};*/
+
 void printMenu(){
     cout << "A - Add a Log" << endl;
-    cout << "S - Search a Log" << endl;
+    cout << "F - Find a Log" << endl;
     cout << "D - Delete a Log" << endl;
+    cout << "S - Sort Log" << endl;
     cout << "P - Print Expenses" << endl; 
     cout << "Q - Quit" << endl << endl;
     //cout << "Edit a Log" << endl;
@@ -411,15 +484,30 @@ int main(){
         if(tolower(choice[0]) == 'a'){
             addItem(log, myFile); 
         }
-        else if(tolower(choice[0]) == 's'){
+        else if(tolower(choice[0]) == 'f'){
             searchItem(log, myFile);
         }
         else if(tolower(choice[0]) == 'd'){
             deleteItem(log, myFile);
         }
         else if(tolower(choice[0]) == 'p'){
-            printCatalog(log, myFile);        }
-        
+            printCatalog(log, myFile);   
+        }
+        else if(tolower(choice[0]) == 's'){
+            cout << "\nWill you like to sort by price or category:" << endl;
+            //cout << "\nWill you like to sort by price or category(p for price or c for category):" << endl;
+            getline(cin, choice);
+            while(tolower(choice[0]) != 'p' && tolower(choice[0]) != 'c'){
+                cout << "\nPlease enter a valid choice: " << endl;
+                getline(cin, choice);  
+            }
+            if(tolower(choice[0]) == 'p'){
+                sortByPrice(myFile,3);
+            }
+            else
+                sortByPrice(myFile,0);
+            
+        }
 
     }while(tolower(choice[0]) != 'q');
 
