@@ -95,9 +95,7 @@ void addItem(fstream& file){
     //price 
     cout << "Enter the price of this purchase(no need to add the $ symbol): " << endl; 
     cin >> price;
-
-    //finally adds the log to a vector
-    vec.push_back(Expense(cat, des, time, price)); 
+ 
     //switching to persistent storage: Using I/O operations 
     //Make sure file is open
     //writing to file now....
@@ -111,9 +109,9 @@ void addItem(fstream& file){
     file.close();
 };
 
-/*void printItem(const vector<string>& vec){
+void printItem(const vector<string>& vec){
     cout << vec[0] << " " << vec[1] << " " << vec[2] << " $" << vec[3] << endl;
-}; */
+}; 
 
 void printCatalog(fstream& file){
   
